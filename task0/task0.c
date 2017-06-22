@@ -53,6 +53,7 @@ void printPhdrTable(){
 	if(debug){
 		fprintf(stderr, "Debug: Phdr entry size: %d\n", phdrEntSize);
 		fprintf(stderr, "Debug: number of entries: %d\n", phdrCount);
+		fprintf(stderr, "Debug: phdr table offset: %d\n", elfFile->e_phoff);
 	}
 
 	Elf32_Phdr* currPhdr;
@@ -60,6 +61,7 @@ void printPhdrTable(){
 	printf("      Type Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Fig Align\n");
 	for (i=0; i < phdrCount; i++){
 		
+		// currPhdr = (Elf32_Phdr*) addr+elfFile->e_phoff+(i*phdrEntSize);
 		currPhdr = addr+elfFile->e_phoff+(i*phdrEntSize);
 		printPhdr(currPhdr);
 	}
