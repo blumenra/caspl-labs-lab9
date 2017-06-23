@@ -52,7 +52,9 @@
 	global _start
 
 	section .text
-_start:	push	ebp
+_start:
+	
+	push	ebp
 	mov	ebp, esp
 	sub	esp, STK_RES            ; Set up ebp and reserve space on the stack for local storage
 
@@ -65,7 +67,7 @@ VirusExit:
 	
 FileName:	db "ELFexec", 0
 OutStr:		db "The lab 9 proto-virus strikes!", 10, 0
-Failstr:        db "perhaps not", 10 , 0
+Failstr:    db "perhaps not", 10 , 0
 	
 PreviousEntryPoint: dd VirusExit
 virus_end:
