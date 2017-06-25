@@ -68,17 +68,26 @@ _start:
 
 
 	write STDOUT, virus_msg, 16
-	open FileName, RDWR, 0777
-	cmp eax, -1
-	je .error_occured
-	mov [ebp-4], eax
-	checkELF [ebp-4]
-	cmp eax, -1
-	je .error_occured
 
-	lseek dword [ebp-4], 0, SEEK_END
-	mov dword [ebp-8], eax
-	write dword [ebp-4], 
+	;open a file called ELFexec
+		open FileName, RDWR, 0777
+		cmp eax, -1
+		je .error_occured
+	
+	;check if ELFexec is elf file
+		mov [ebp-4], eax
+		checkELF [ebp-4]
+		cmp eax, -1
+		je .error_occured
+
+	;move the cursor of ELFexec to the end of the file (get file size on the way)
+		lseek dword [ebp-4], 0, SEEK_END
+		mov dword [ebp-8], eax
+		.bla:
+		mov ecx, ebp
+		sub ecx, 8
+		
+	write STDOUT, ecx, 4
 	close dword [ebp-4]
 	mov eax, 1
 	jmp VirusExit
@@ -90,7 +99,8 @@ _start:
 ; You code for this lab goes here
 
 VirusExit:
-       exit eax            ; Termination if all is OK and no previous code to jump to
+		add	esp, STK_RES            ; Set up ebp and reserve space on the stack for local storage
+		exit eax            ; Termination if all is OK and no previous code to jump to
                          ; (also an example for use of above macros)
 	
 ;FileName:	db "makefile", 0
