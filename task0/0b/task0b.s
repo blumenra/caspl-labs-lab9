@@ -36,6 +36,14 @@
 	syscall1 6, %1
 %endmacro
 
+%macro  checkELF 1
+	push dword %1
+	call real_checkELF
+	add esp, 4
+%endmacro
+
+%define	STDOUT	1
+
 %define	STK_RES	200
 %define	RDWR	2
 %define	SEEK_END 2
@@ -59,6 +67,14 @@ _start:
 	sub	esp, STK_RES            ; Set up ebp and reserve space on the stack for local storage
 
 
+	write STDOUT, virus_msg, 16
+	open FileName, RDWR, 0x0777
+	mov [ebp-4], eax
+	.bla:
+	checkELF [ebp-4]
+	close dword [ebp-4]
+
+
 ; You code for this lab goes here
 
 VirusExit:
@@ -68,8 +84,30 @@ VirusExit:
 FileName:	db "ELFexec", 0
 OutStr:		db "The lab 9 proto-virus strikes!", 10, 0
 Failstr:    db "perhaps not", 10 , 0
-	
+virus_msg:    db "This is a virus", 10 , 0
+elf_magic:    db "ELF", 0
+
+
 PreviousEntryPoint: dd VirusExit
 virus_end:
 
 
+real_checkELF:
+	push ebp
+	mov ebp, esp
+
+	.bla:
+	cmp dword [ebp+8], 0
+	jge .cont
+	mov eax, -1
+	jmp .end_checkELF
+
+	.cont:
+		write STDOUT, virus_msg, 16
+
+	.end_checkELF:
+
+	mov esp, ebp
+	pop ebp
+
+	ret
