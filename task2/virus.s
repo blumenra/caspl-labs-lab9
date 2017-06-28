@@ -102,8 +102,9 @@ _start:
 		mov esi, ebp
 		sub esi, 60							;52+4+4
 		read dword [ebp-4], esi, 52
-		add esi, 24
-		mov dword [esi], 0x08048294
+		;add esi, 24
+
+		mov dword [esi+24], 0x08048294
 		;write STDOUT, esi, 4
 		;swrite STDOUT, _start, 4
 		;write STDOUT, esi, 52
