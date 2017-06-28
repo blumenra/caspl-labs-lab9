@@ -1,14 +1,14 @@
 
-all: task0b
+all: virus
 
-task0b: task0b.o
-	ld -g -m elf_i386 task0b.o -o task0b
+virus: virus.o
+	ld -g -m elf_i386 virus.o -o virus
 
-task0b.o: task0b.s
-	nasm -g -w+all  -f elf  task0b.s -o task0b.o -l task0b.lst
+virus.o: virus.s
+	nasm -g -w+all  -f elf  virus.s -o virus.o -l virus.lst
 
 .PHONY:
 	clean
 
 clean:
-	rm ./*.o task0b task0b.lst
+	rm ./*.o virus virus.lst
