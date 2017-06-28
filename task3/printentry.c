@@ -27,6 +27,7 @@ int main(int argc, char** argv){
 		exit(1);
 	}
 
+	printf("%s's file size: %d\n", argv[1], fileSize);
 	printf("%s's entry point: ", argv[1]);
 
 	entryPoint = fileBuf+24;
