@@ -15,5 +15,6 @@ chmod 777 ELFexec2cpy1
 cat ELFexec2 > ELFexec2cpy
 chmod 777 ELFexec2cpy
 ./ELFexec2cpy1
+make clean
 rm -f printentry
 rm -f ./ELFexec2cpy1
