@@ -1,0 +1,24 @@
+#!/bin/sh
+
+cat ELFexec2 > ELFexec2cpy
+chmod 777 ELFexec2cpy
+make
+gcc -g -Wall -m32 printentry.c -o printentry
+./ELFexec2cpy
+./printentry ELFexec2cpy
+echo virus runs
+./virus
+echo program runs
+cat ELFexec2cpy > ELFexec2cpy1
+chmod 777 ELFexec2cpy1
+cat ELFexec2 > ELFexec2cpy
+chmod 777 ELFexec2cpy
+./printentry ELFexec2cpy1
+./ELFexec2cpy1
+echo program runs
+./printentry ELFexec2cpy
+./ELFexec2cpy
+make clean
+rm -f printentry
+rm -f ./ELFexec2cpy
+# rm -f ./ELFexec2cpy1
